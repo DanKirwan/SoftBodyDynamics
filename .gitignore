@@ -1,0 +1,32 @@
+# Binary directories go in the bin
+/.gradle/
+/build/
+/bin/
+/out/
+/mappings/
+
+# These files should be Eclipsed from the repo
+.classpath
+.project
+/.settings/
+
+# Would also be a good IDEA to ignore these
+/.idea/
+*.iml
+*.imr
+*.ipr
+
+# Also ignore Crap OS X and Micro$oft
+.DS_STORE
+Thumbs.db
+
+# Floobits
+.floo
+.flooignore
+
+# Log files
+*.log
+gl_debug_log.txt
+*.aux
+*.toc
+/levelEditor/.settings/

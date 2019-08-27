@@ -23,7 +23,8 @@ public class Camera {
 
     private double prevMouseX;
     private double prevMouseY;
-    private boolean dragging = false;
+    private boolean dragging = true;
+    private boolean wasTDown = false;
     private float yaw = 0;
     private float pitch = 0;
 
@@ -65,7 +66,7 @@ public class Camera {
 
     public Matrix4f getViewMat() {
         viewMatrix.identity();
-        viewMatrix.rotate(rotation.invert(new Quaternionf()));
+        viewMatrix.rotate(rotation);
         viewMatrix.translate(-position.x(), -position.y(), -position.z());
         return viewMatrix;
     }
@@ -77,32 +78,30 @@ public class Camera {
         double mouseY = window.getMouseY();
 
 
-        if (dragging) {
+        //T to start moving, ESC to stop
+        if(window.isKeyDown(GLFW_KEY_T)) {
+            dragging = true;
+            window.disableCursor();
+        }
 
+        if(window.isKeyDown(GLFW_KEY_ESCAPE)) {
+            dragging = false;
+            window.showCursor();
+        }
+
+        if (dragging) {
+            window.disableCursor();
             double dx = mouseX - prevMouseX;
             double dy = mouseY - prevMouseY;
             prevMouseX = mouseX;
             prevMouseY = mouseY;
             if (dx != 0 || dy != 0) {
-                yaw = MathUtil.wrapAngle(yaw - (float) dx * SPIN_SENSITIVITY);
-                pitch = MathUtil.clamp(pitch + (float) dy * SPIN_SENSITIVITY, -Mathf.PI / 2, Mathf.PI / 2);
+                yaw = MathUtil.wrapAngle(yaw + (float) dx * SPIN_SENSITIVITY);
+                pitch = MathUtil.clamp(pitch + (float) dy * SPIN_SENSITIVITY, -Mathf.PI / 2 + 0.001f, Mathf.PI / 2 - 0.001f);
 
-                rotation.set(VectorUtil.eulerToQuaternion(yaw, 0, pitch));
+                rotation.identity().rotateAxis(pitch, 1,0,0).rotateAxis(yaw, 0,1,0);
             }
         }
-
-        if(window.isMouseInside() && window.isMouseButtonDown(GLFW_MOUSE_BUTTON_2)) {
-            dragging = true;
-            window.disableCursor();
-
-        } else {
-            dragging = false;
-            window.showCursor();
-        }
-
-        prevMouseX = mouseX;
-        prevMouseY = mouseY;
-
 
 
 
@@ -123,9 +122,16 @@ public class Camera {
             vertical -= MOVEMENT_SENSITIVITY;
 
 
-        position.add(forwards * Mathf.sin(yaw) + sideways * Mathf.cos(yaw),
-                vertical,
-                 -forwards * Mathf.cos(yaw) + sideways * Mathf.sin(yaw));
+        position.add(rotation.positiveZ(new Vector3f()).mul(1,0,1).normalize().mul(forwards).negate());
+        position.add(rotation.positiveX(new Vector3f()).mul(1,0,1).normalize().mul(sideways));
+        position.add(0,vertical, 0);
+
+        if(window.isKeyDown(GLFW_KEY_O)) {
+            position.set(0,0,0);
+            rotation.identity();
+            yaw = 0;
+            pitch = 0;
+        }
 
     }
 

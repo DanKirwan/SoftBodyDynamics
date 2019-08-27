@@ -20,6 +20,8 @@ public class Mesh {
 
     private ArrayList<Triangle> primitives = new ArrayList<>();
 
+    private BakedMesh bakedMesh;
+
 
     public final String location;
 
@@ -100,7 +102,7 @@ public class Mesh {
     }
 
 
-    public BakedMesh bakeMesh() {
+    public void reBakeMesh() {
         MeshBuilder builder = BakedMesh.builder(VertexFormat.POS_NORM);
 
         for(Triangle tri : primitives) {
@@ -112,7 +114,13 @@ public class Mesh {
                     .norm(normals.get(tri.normInds[2] - 1));
         }
 
-        return builder.createMesh();
+        if(bakedMesh != null) bakedMesh.free();
+        bakedMesh =  builder.createMesh();
+    }
+
+    public BakedMesh getMesh() {
+        if(bakedMesh == null) reBakeMesh();
+        return bakedMesh;
     }
 
 

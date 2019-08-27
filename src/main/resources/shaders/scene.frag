@@ -11,5 +11,6 @@ void main() {
     vec3 toLightDir = lightPos - worldPos;
     toLightDir = normalize(toLightDir);
     float brightness = dot(toLightDir, worldNorm);
-	gl_FragColor =  vec4(brightness);
+    brightness = 0.5 + brightness*0.5;
+	gl_FragColor =  vec4(brightness, brightness, brightness,1);
 }
